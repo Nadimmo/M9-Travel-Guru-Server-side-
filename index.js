@@ -31,6 +31,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     const CollectionOfPackeges = client.db("TravelGuru").collection("packegeDB");
     const CollectionOfCustomerBooking = client.db("TravelGuru").collection("bookingDB");
+    const CollectionOfCustomerReview = client.db("TravelGuru").collection("reviewDB");
     // await client.connect();
     //package related api
     app.post('/packages', async(req,res)=>{
@@ -70,6 +71,20 @@ async function run() {
         const result = await CollectionOfCustomerBooking.find(filter).toArray()
         res.send(result);
     })
+
+    // review related api
+    app.post('/reviews', async(req,res)=>{
+      const review = req.body;
+      const result = await CollectionOfCustomerReview.insertOne(review);
+      res.send(result);
+    })
+
+    app.get('/reviews', async(req,res)=>{
+      const review = req.body;
+      const result = await CollectionOfCustomerReview.find(review).toArray()
+      res.send(result);
+    })
+
     
     
     // Send a ping to confirm a successful connection
