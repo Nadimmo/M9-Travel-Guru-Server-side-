@@ -32,6 +32,7 @@ async function run() {
     const CollectionOfPackeges = client.db("TravelGuru").collection("packegeDB");
     const CollectionOfCustomerBooking = client.db("TravelGuru").collection("bookingDB");
     const CollectionOfCustomerReview = client.db("TravelGuru").collection("reviewDB");
+    const CollectionOfDestination = client.db("TravelGuru").collection("destinationDB");
     // await client.connect();
     //package related api
     app.post('/packages', async(req,res)=>{
@@ -85,6 +86,18 @@ async function run() {
       res.send(result);
     })
 
+    //booking your trip destination api
+    app.post('/destination', async(req,res)=>{
+        const destination = req.body;
+        const result = await CollectionOfDestination.insertOne(destination);
+        res.send(result);
+    })
+    app.get('/destination', async(req,res)=>{
+        const user = req.query.email;
+        const filter = {email: user}
+        const result = await CollectionOfDestination.find(filter).toArray()
+        res.send(result);
+    })
     
     
     // Send a ping to confirm a successful connection
