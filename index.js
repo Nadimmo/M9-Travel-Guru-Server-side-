@@ -7,7 +7,7 @@ const port = process.env.PORT || 5000;
 
 app.use(express.json())
 app.use(cors(
-    { origin: ['http://localhost:5000'] }
+    { origin: ['http://localhost:5173'] }
 
 ))
 
@@ -30,6 +30,7 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     const CollectionOfPackeges = client.db("TravelGuru").collection("packegeDB");
+    const CollectionOfCustomerBooking = client.db("TravelGuru").collection("bookingDB");
     // await client.connect();
     //package related api
     app.post('/packages', async(req,res)=>{
@@ -54,6 +55,24 @@ async function run() {
         const id = req.params.id;
         const result = await CollectionOfPackeges.deleteOne({_id:id});
         res.send(result);
+    })
+
+    //booking related api
+    app.post('/booking', async(req,res)=>{
+        const newBooking = req.body;
+        const result = await CollectionOfCustomerBooking.insertOne(newBooking);
+        res.send(result);
+    })
+    app.get('/booking', async(req,res)=>{
+        const booking = req.body;
+        const result = await CollectionOfCustomerBooking.find(booking).toArray();
+        res.send(result);
+    })
+    app.get('/booking/:id', async(req,res)=>{
+      const id = req.params.id
+      const filter = {_id: new ObjectId(id)}
+      const result = await CollectionOfCustomerBooking.findOne(filter)
+      res.send(result)
     })
     
     // Send a ping to confirm a successful connection
