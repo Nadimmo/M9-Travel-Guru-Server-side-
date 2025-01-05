@@ -73,6 +73,12 @@ async function run() {
         res.send(result);
     })
 
+    app.get('/allBooking', async(req,res)=>{
+      const booking = req.body;
+      const result = await CollectionOfCustomerBooking.find(booking).toArray()
+      res.send(result);
+    })
+
     // review related api
     app.post('/reviews', async(req,res)=>{
       const review = req.body;
