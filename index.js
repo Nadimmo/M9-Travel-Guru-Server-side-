@@ -63,17 +63,14 @@ async function run() {
         const result = await CollectionOfCustomerBooking.insertOne(newBooking);
         res.send(result);
     })
+    
     app.get('/booking', async(req,res)=>{
-        const booking = req.body;
-        const result = await CollectionOfCustomerBooking.find(booking).toArray();
+        const email = req.query.email;
+        const filter = {email: email}
+        const result = await CollectionOfCustomerBooking.find(filter).toArray()
         res.send(result);
     })
-    app.get('/booking/:id', async(req,res)=>{
-      const id = req.params.id
-      const filter = {_id: new ObjectId(id)}
-      const result = await CollectionOfCustomerBooking.findOne(filter)
-      res.send(result)
-    })
+    
     
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
