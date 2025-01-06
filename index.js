@@ -33,6 +33,7 @@ async function run() {
     const CollectionOfCustomerBooking = client.db("TravelGuru").collection("bookingDB");
     const CollectionOfCustomerReview = client.db("TravelGuru").collection("reviewDB");
     const CollectionOfDestination = client.db("TravelGuru").collection("destinationDB");
+    const CollectionOfAllUsers = client.db("TravelGuru").collection("usersDB");
     // await client.connect();
     //package related api
     app.post('/packages', async(req,res)=>{
@@ -112,6 +113,31 @@ async function run() {
         res.send(result);
     })
     
+    //user related api
+    app.post('/users', async(req,res)=>{
+      const newUser = req.body;
+      const filter = {email: newUser.email}
+      const exited = await CollectionOfAllUsers.findOne(filter)
+      if(exited){
+        return res.status(400).send('User already exist')
+      }
+      const result = await CollectionOfAllUsers.insertOne(newUser);
+      res.send(result);
+    })
+
+    app.get('/users', async(req,res)=>{
+      const users = req.body;
+      const result = await CollectionOfAllUsers.find(users).toArray()
+      res.send(result);
+    })
+
+    app.get('/users/:id', async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)};
+      const result = await CollectionOfAllUsers.findOne(filter);
+      res.send(result);
+    })
+
     
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
