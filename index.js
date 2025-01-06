@@ -73,6 +73,13 @@ async function run() {
         res.send(result);
     })
 
+    app.delete('/booking/:id', async(req,res)=>{
+      const id = req.params.id;
+      const filter =  {_id: new ObjectId(id)}
+      const result = await CollectionOfCustomerBooking.deleteOne(filter);
+      res.send(result);
+    })
+
     app.get('/allBooking', async(req,res)=>{
       const booking = req.body;
       const result = await CollectionOfCustomerBooking.find(booking).toArray()
