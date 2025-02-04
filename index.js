@@ -56,7 +56,8 @@ async function run() {
 
     app.delete('/packages/:id', async(req,res)=>{
         const id = req.params.id;
-        const result = await CollectionOfPackeges.deleteOne({_id:id});
+        const filter = {_id : new ObjectId(id)};
+        const result = await CollectionOfPackeges.deleteOne(filter);
         res.send(result);
     })
     //booking related api
