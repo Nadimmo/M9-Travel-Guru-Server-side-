@@ -59,7 +59,6 @@ async function run() {
         const result = await CollectionOfPackeges.deleteOne({_id:id});
         res.send(result);
     })
-
     //booking related api
     app.post('/booking', async(req,res)=>{
         const newBooking = req.body;
@@ -81,11 +80,13 @@ async function run() {
       res.send(result);
     })
 
+
+    //show  all booking
     app.get('/allBooking', async(req,res)=>{
       const booking = req.body;
       const result = await CollectionOfCustomerBooking.find(booking).toArray()
       res.send(result);
-    })
+    })  
 
     // review related api
     app.post('/reviews', async(req,res)=>{
