@@ -36,7 +36,7 @@ async function run() {
     const CollectionOfAllUsers = client.db("TravelGuru").collection("usersDB");
     // await client.connect();
     //package related api
-    app.post('/packages', async(req,res)=>{
+    app.post('/addPackages', async(req,res)=>{
         const newPackage = req.body;
         const result = await CollectionOfPackeges.insertOne(newPackage);
         res.send(result);
