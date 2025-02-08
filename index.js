@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const app = express()
+const jwt  = require('jsonwebtoken')
 const dotenv = require('dotenv')
 dotenv.config()
 const port = process.env.PORT || 5000;
@@ -35,6 +36,13 @@ async function run() {
     const CollectionOfDestination = client.db("TravelGuru").collection("destinationDB");
     const CollectionOfAllUsers = client.db("TravelGuru").collection("usersDB");
     // await client.connect();
+    // create jwt
+    app.post('/jwt', async(req,res)=>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.SECRET_KEY, { expiresIn: '1h' });  
+      res.json({ token });
+    })
+
     //package related api
     app.post('/addPackages', async (req, res) => {
       const newPackage = req.body;
