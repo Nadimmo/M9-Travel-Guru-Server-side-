@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const app = express()
-const jwt  = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 dotenv.config()
 const port = process.env.PORT || 5000;
@@ -36,15 +36,29 @@ async function run() {
     const CollectionOfDestination = client.db("TravelGuru").collection("destinationDB");
     const CollectionOfAllUsers = client.db("TravelGuru").collection("usersDB");
     // await client.connect();
+    const verifyToken = async (req, res, next) => {
+      if (!req.headers.authorization) {
+        res.status(401).send({ message: "unAuthorize Access" });
+      }
+      const token = req.headers.authorization.split(" ")[1];
+      console.log(token)
+      jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+        if (err){
+          res.status(403).send({ message: "Invalid Token" });
+        }
+        req.decoded = decoded;
+        next();
+      });
+    }
     // create jwt
-    app.post('/jwt', async(req,res)=>{
+    app.post('/jwt', async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.SECRET_KEY, { expiresIn: '1h' });  
+      const token = jwt.sign(user, process.env.SECRET_KEY, { expiresIn: '1h' });
       res.json({ token });
     })
 
     //package related api
-    app.post('/addPackages', async (req, res) => {
+    app.post('/addPackages', verifyToken, async (req, res) => {
       const newPackage = req.body;
       const result = await CollectionOfPackeges.insertOne(newPackage);
       res.send(result);
@@ -61,15 +75,15 @@ async function run() {
       const result = await CollectionOfPackeges.findOne(filter);
       res.send(result);
     })
-    app.delete('/packages/:id', async (req, res) => {
+    app.delete('/packages/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await CollectionOfPackeges.deleteOne(filter);
       res.send(result);
     })
-    
 
-    app.patch('/updatePackage/:id', async (req, res) => {
+
+    app.patch('/updatePackage/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const newPackage = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -156,27 +170,27 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users', async (req, res) => {
+    app.get('/users', verifyToken, async (req, res) => {
       const users = req.body;
       const result = await CollectionOfAllUsers.find(users).toArray()
       res.send(result);
     })
 
-    app.get('/users/:id', async (req, res) => {
+    app.get('/users/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await CollectionOfAllUsers.findOne(filter);
       res.send(result);
     })
 
-    app.delete('/users/:id', async(req,res)=>{
+    app.delete('/users/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await CollectionOfAllUsers.deleteOne(filter);
       res.send(result);
     })
     //make admin  
-    app.patch('/users/admin/:id', async(req,res)=>{
+    app.patch('/users/admin/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
