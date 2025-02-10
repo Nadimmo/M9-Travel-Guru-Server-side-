@@ -36,6 +36,9 @@ async function run() {
     const CollectionOfDestination = client.db("TravelGuru").collection("destinationDB");
     const CollectionOfAllUsers = client.db("TravelGuru").collection("usersDB");
     // await client.connect();
+
+
+    //verify token
     const verifyToken = async (req, res, next) => {
       if (!req.headers.authorization) {
         res.status(401).send({ message: "unAuthorize Access" });
@@ -43,13 +46,26 @@ async function run() {
       const token = req.headers.authorization.split(" ")[1];
       console.log(token)
       jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
-        if (err){
+        if (err) {
           res.status(403).send({ message: "Invalid Token" });
         }
         req.decoded = decoded;
         next();
       });
     }
+
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await CollectionOfAllUsers.findOne(query);
+      const isAdmin = user?.role === "admin";
+      if (!isAdmin) {
+        res.status(403).send({ message: "Forbidden Access" });
+      }
+      next()
+    }
+
     // create jwt
     app.post('/jwt', async (req, res) => {
       const user = req.body;
@@ -202,18 +218,18 @@ async function run() {
       res.send(result);
     })
     //check admin
-    app.get("/users/admin/:email", verifyToken,async(req,res)=>{
+    app.get("/users/admin/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
-      if(email !== req.decoded.email){
+      if (email !== req.decoded.email) {
         return res.status(403).send({ message: "Access Denied" });
       }
-      const filter = {email: email}
+      const filter = { email: email }
       const user = await CollectionOfAllUsers.findOne(filter)
       let isAdmin = false;
-      if(user){
+      if (user) {
         isAdmin = user.role === "admin";
       }
-      res.send({isAdmin});
+      res.send({ isAdmin });
     })
 
     // Send a ping to confirm a successful connection
