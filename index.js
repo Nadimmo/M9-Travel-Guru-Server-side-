@@ -201,6 +201,20 @@ async function run() {
       const result = await CollectionOfAllUsers.updateOne(filter, updateDoc)
       res.send(result);
     })
+    //check admin
+    app.get("/users/admin/:email", verifyToken,async(req,res)=>{
+      const email = req.params.email;
+      if(email !== req.decoded.email){
+        return res.status(403).send({ message: "Access Denied" });
+      }
+      const filter = {email: email}
+      const user = await CollectionOfAllUsers.findOne(filter)
+      let isAdmin = false;
+      if(user){
+        isAdmin = user.role === "admin";
+      }
+      res.send({isAdmin});
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
