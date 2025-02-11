@@ -54,21 +54,29 @@ async function run() {
         console.log(req.decoded.email)
         next();
       })
-
     }
 
-
-
+    //verify admin
+    const verifyAdmin = async (req,res,next)=>{
+      const email = req.decoded.email;
+      const filter = {email: email};
+      const user = await CollectionOfAllUsers.findOne(filter);
+      const isAdmin = user?.role === "admin";
+      if(!isAdmin){
+        return res.status(403).send({ message: "Not authorized to perform this action" })
+      }
+      next()
+    }
 
     // create jwt
-    app.post('/jwt', async (req, res) => {
+    app.post('/jwt',  async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
       res.json({ token });
     })
 
     //package related api
-    app.post('/addPackages', verifyToken, async (req, res) => {
+    app.post('/addPackages', verifyToken, verifyAdmin, async (req, res) => {
       const newPackage = req.body;
       const result = await CollectionOfPackeges.insertOne(newPackage);
       res.send(result);
@@ -85,7 +93,7 @@ async function run() {
       const result = await CollectionOfPackeges.findOne(filter);
       res.send(result);
     })
-    app.delete('/packages/:id', verifyToken, async (req, res) => {
+    app.delete('/packages/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await CollectionOfPackeges.deleteOne(filter);
@@ -93,7 +101,7 @@ async function run() {
     })
 
 
-    app.patch('/updatePackage/:id', verifyToken, async (req, res) => {
+    app.patch('/updatePackage/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const newPackage = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -180,7 +188,7 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users', verifyToken, async (req, res) => {
+    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
       const users = req.body;
       const result = await CollectionOfAllUsers.find(users).toArray()
       res.send(result);
@@ -193,14 +201,14 @@ async function run() {
       res.send(result);
     })
 
-    app.delete('/users/:id', verifyToken, async (req, res) => {
+    app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await CollectionOfAllUsers.deleteOne(filter);
       res.send(result);
     })
     //make admin  
-    app.patch('/users/admin/:id', verifyToken, async (req, res) => {
+    app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -211,7 +219,7 @@ async function run() {
       const result = await CollectionOfAllUsers.updateOne(filter, updateDoc)
       res.send(result);
     })
-
+    //check user is an admin
     app.get('/users/admin/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
   
