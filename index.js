@@ -39,37 +39,31 @@ async function run() {
 
 
     //verify token
-    const verifyToken = async (req, res, next) => {
+    const verifyToken = (req, res, next) => {
       if (!req.headers.authorization) {
-        res.status(401).send({ message: "unAuthorize Access" });
+        return res.status(401).send({ message: "UnAuthorization" })
       }
-      const token = req.headers.authorization.split(" ")[1];
+      const token = req.headers.authorization.split(" ")[1]
       console.log(token)
-      jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
-          res.status(403).send({ message: "Invalid Token" });
+          return res.status(403).send({ message: "Token is not valid" })
         }
-        req.decoded = decoded;
+        req.decoded = decoded
+        console.log(req.decoded)
+        console.log(req.decoded.email)
         next();
-      });
+      })
+
     }
 
-    // verify admin
-    const verifyAdmin = async (req, res, next) => {
-      const email = req.decoded.email;
-      const query = { email: email };
-      const user = await CollectionOfAllUsers.findOne(query);
-      const isAdmin = user?.role === "admin";
-      if (!isAdmin) {
-        res.status(403).send({ message: "Forbidden Access" });
-      }
-      next()
-    }
+
+
 
     // create jwt
     app.post('/jwt', async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.SECRET_KEY, { expiresIn: '1h' });
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
       res.json({ token });
     })
 
@@ -217,20 +211,23 @@ async function run() {
       const result = await CollectionOfAllUsers.updateOne(filter, updateDoc)
       res.send(result);
     })
-    //check admin
-    app.get("/users/admin/:email", verifyToken, async (req, res) => {
+
+    app.get('/users/admin/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
+  
       if (email !== req.decoded.email) {
-        return res.status(403).send({ message: "Access Denied" });
+          return res.status(403).send({ message: 'forbidden access' });
       }
-      const filter = { email: email }
-      const user = await CollectionOfAllUsers.findOne(filter)
-      let isAdmin = false;
-      if (user) {
-        isAdmin = user.role === "admin";
+  
+      const query = { email: email };
+      const user = await CollectionOfAllUsers.findOne(query);
+      let admin = false;
+      if (user){
+        admin = user?.role === "admin";
       }
-      res.send({ isAdmin });
-    })
+      res.send({admin})
+      })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });

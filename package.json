@@ -16,5 +16,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.12.0",
     "react-dotenv": "^0.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1"
   }
 }
