@@ -36,6 +36,7 @@ async function run() {
     const CollectionOfCustomerReview = client.db("TravelGuru").collection("reviewDB");
     const CollectionOfDestination = client.db("TravelGuru").collection("destinationDB");
     const CollectionOfAllUsers = client.db("TravelGuru").collection("usersDB");
+    const CollectionOfPayments = client.db("TravelGuru").collection("paymentDB");
     // await client.connect();
 
 
@@ -250,6 +251,23 @@ async function run() {
         clientSecret: paymentIntent.client_secret
       });
     })
+
+    // send payment information in database 
+    app.post('/payments', verifyToken, async (req, res) => {
+      const payment = req.body;
+      const PaymentResult = await CollectionOfPayments.insertOne(payment);
+      const filter = {
+        _id:{
+          $in: payment.bookingIds.map(id => new ObjectId(id))
+        }
+      }
+      const DeleteCard = await CollectionOfCustomerBooking.deleteMany(filter);
+      res.send({PaymentResult, DeleteCard});
+    })
+
+    
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
