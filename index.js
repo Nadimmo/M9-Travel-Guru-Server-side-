@@ -265,6 +265,16 @@ async function run() {
       res.send({PaymentResult, DeleteCard});
     })
 
+    //get user payment history
+    app.get('/payments/:email', verifyToken, async(req,res)=>{
+      const email = req.params.email;
+      if(email !== req.decoded.email){
+        return res.status(403).send({message: 'forbidden access'});
+      }
+      const filter = {email: email}
+      const result = await CollectionOfPayments.find(filter).toArray()
+      res.send(result)
+    })
 
 
 

@@ -1,4 +1,9 @@
-// create jwt
+Add jwt api and verify jwt. Make admin and verify admin api and Payment related api.
+
+
+
+
+// ......create jwt.......//
     app.post('/jwt', async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
@@ -6,19 +11,25 @@
     })
 
 
-    //verify admin
-    const verifyAdmin = async (req, res, next) => {
-      const email = req.decoded.email;
-      const filter = { email: email };
-      const user = await CollectionOfAllUsers.findOne(filter);
-      const isAdmin = user?.role === "admin";
-      if (!isAdmin) {
-        return res.status(403).send({ message: "Not authorized to perform this action" })
+   //....verify token....//
+    const verifyToken = (req, res, next) => {
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: "UnAuthorization" })
       }
-      next()
+      const token = req.headers.authorization.split(" ")[1]
+      console.log(token)
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(403).send({ message: "Token is not valid" })
+        }
+        req.decoded = decoded
+        console.log(req.decoded)
+        console.log(req.decoded.email)
+        next();
+      })
     }
 
-     //make admin  
+     //....make admin....//  
     app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -31,7 +42,7 @@
       res.send(result);
     })
 
-    //check user is an admin
+    //.....check user is an admin....//
     app.get('/users/admin/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
 
@@ -48,7 +59,7 @@
       res.send({ admin })
     })
 
-    //verify admin
+    //....verify admin....//
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
       const filter = { email: email };
@@ -61,7 +72,7 @@
     }
 
 
-    //payment intent
+    //.....payment intent...//
     app.post('/create-payment-intent',  async (req, res) => {
       const { price } = req.body;
       const total = parseInt(price * 100);
@@ -75,7 +86,7 @@
       });
     })
 
-    // send payment information in database 
+    // ....send payment information in database...// 
     app.post('/payments',  async (req, res) => {
       const payment = req.body;
       const PaymentResult = await CollectionOfPayments.insertOne(payment);
