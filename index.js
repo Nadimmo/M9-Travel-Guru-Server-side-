@@ -239,9 +239,9 @@ async function run() {
     })
 
     //payment intent
-    app.post('/create-payment-intent', async (req, res) => {
+    app.post('/create-payment-intent',  async (req, res) => {
       const { price } = req.body;
-      const total = parseInt(price * 100)
+      const total = parseInt(price * 100);
       const paymentIntent = await stripe.paymentIntents.create({
         amount: total,
         currency: 'usd',
@@ -253,7 +253,7 @@ async function run() {
     })
 
     // send payment information in database 
-    app.post('/payments', verifyToken, async (req, res) => {
+    app.post('/payments',  async (req, res) => {
       const payment = req.body;
       const PaymentResult = await CollectionOfPayments.insertOne(payment);
       const filter = {
@@ -265,7 +265,7 @@ async function run() {
       res.send({PaymentResult, DeleteCard});
     })
 
-    
+
 
 
     // Send a ping to confirm a successful connection
