@@ -98,3 +98,22 @@ Add jwt api and verify jwt. Make admin and verify admin api and Payment related 
       const DeleteCard = await CollectionOfCustomerBooking.deleteMany(filter);
       res.send({PaymentResult, DeleteCard});
     })
+
+
+    //when you deploy in vercel your backend code you can add this code vercel.json file
+    {
+    "version": 2,
+    "builds": [
+        {
+            "src": "./index.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/",
+            "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+        }
+    ]
+}
