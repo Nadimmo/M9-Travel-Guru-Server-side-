@@ -37,6 +37,7 @@ async function run() {
     const CollectionOfDestination = client.db("TravelGuru").collection("destinationDB");
     const CollectionOfAllUsers = client.db("TravelGuru").collection("usersDB");
     const CollectionOfPayments = client.db("TravelGuru").collection("paymentDB");
+    const CollectionOfContact = client.db("TravelGuru").collection("contactDB");
     // await client.connect();
 
 
@@ -176,6 +177,19 @@ async function run() {
       const filter = { email: user }
       const result = await CollectionOfDestination.find(filter).toArray()
       res.send(result);
+    })
+
+    //contact related api
+    app.post('/contacts', async(req,res)=>{
+      const requestUser = req.body;
+      const result = await CollectionOfContact.insertOne(requestUser);
+      res.send(result)
+    })
+
+    app.get('/contacts', async(req,res)=>{
+      const info = req.body;
+      const result = await CollectionOfContact.find(info).toArray();
+      res.send(result)
     })
 
     //user related api
